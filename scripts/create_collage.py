@@ -2,142 +2,187 @@ from PIL import Image, ImageDraw, ImageFont
 from pathlib import Path
 from datetime import datetime
 
-OUTPUT = Path("public/weather/marine-forecast.jpg")
-
 WIDTH = 1080
 HEIGHT = 1350
 
-canvas = Image.new("RGB", (WIDTH, HEIGHT), (239, 244, 249))
+HEADER_HEIGHT = 130
+FOOTER_HEIGHT = 70
+
+OUTPUT = "public/weather/marine-forecast.jpg"
+
+canvas = Image.new(
+    "RGB",
+    (WIDTH, HEIGHT),
+    (241, 246, 250)
+)
+
 draw = ImageDraw.Draw(canvas)
 
-HEADER_H = 140
-FOOTER_H = 80
-
-GRID_TOP = HEADER_H + 10
-GRID_HEIGHT = 850
+# --------------------------------------------------
+# Fonts
+# --------------------------------------------------
 
 try:
     title_font = ImageFont.truetype(
         "DejaVuSans-Bold.ttf",
-        50
+        42
     )
 
-    label_font = ImageFont.truetype(
+    section_font = ImageFont.truetype(
         "DejaVuSans-Bold.ttf",
-        24
+        22
     )
 
     footer_font = ImageFont.truetype(
         "DejaVuSans.ttf",
-        22
+        18
     )
 
 except:
     title_font = ImageFont.load_default()
-    label_font = ImageFont.load_default()
+    section_font = ImageFont.load_default()
     footer_font = ImageFont.load_default()
 
-# Background
-draw.rectangle(
-    [(0, 0), (WIDTH, HEIGHT)],
-    fill=(245, 248, 252)
-)
-
+# --------------------------------------------------
 # Header
+# --------------------------------------------------
+
 draw.rectangle(
-    [(0, 0), (WIDTH, HEADER_H)],
-    fill=(0, 55, 110)
+    [(0, 0), (WIDTH, HEADER_HEIGHT)],
+    fill=(0, 45, 90)
 )
 
 draw.text(
-    (30, 38),
-    "RabirubiaWeather Marine Forecast",
+    (28, 28),
+    "RabirubiaWeather Rain Virtual Forecast",
     fill="white",
     font=title_font
 )
 
+# --------------------------------------------------
 # Logo
-logo_path = "assets/rabirubiaweather-logo.png"
+# --------------------------------------------------
 
 try:
-    logo = Image.open(logo_path).convert("RGBA")
-    logo.thumbnail((180, 90))
+    logo = Image.open(
+        "assets/rabirubiaweather-logo.png"
+    ).convert("RGBA")
+
+    logo.thumbnail((220, 90))
 
     canvas.paste(
         logo,
-        (870, 25),
+        (840, 15),
         logo
     )
+
 except:
-    print("Logo not found. Continuing.")
+    pass
 
-images = [
-    ("24 Hour Rainfall", "downloads/24hr.png"),
-    ("48 Hour Rainfall", "downloads/48hr.png"),
-    ("72 Hour Rainfall", "downloads/72hr.png"),
-    ("Virtual Buoys", "downloads/buoys.png"),
-]
+# --------------------------------------------------
+# Top Row
+# --------------------------------------------------
 
-positions = [
-    (20, GRID_TOP),
-    (550, GRID_TOP),
-    (20, GRID_TOP + 370),
-    (550, GRID_TOP + 370),
-]
-
-BOX_W = 510
-BOX_H = 340
-
-for (label, path), (x, y) in zip(images, positions):
+def add_panel(label, image_path, x, y, w, h):
 
     draw.rounded_rectangle(
-        [x, y, x + BOX_W, y + BOX_H],
-        radius=18,
+        [x, y, x + w, y + h],
+        radius=20,
         fill="white",
-        outline=(210, 215, 220),
+        outline=(210, 210, 210),
         width=2
     )
 
     draw.text(
         (x + 15, y + 10),
         label,
-        fill=(0, 55, 110),
-        font=label_font
+        fill=(0, 45, 90),
+        font=section_font
     )
 
-    img = Image.open(path).convert("RGB")
+    img = Image.open(image_path)
 
     img.thumbnail(
-        (BOX_W - 20, BOX_H - 60),
+        (w - 30, h - 60),
         Image.Resampling.LANCZOS
     )
 
-    px = x + (BOX_W - img.width) // 2
+    px = x + (w - img.width) // 2
     py = y + 45
 
     canvas.paste(img, (px, py))
 
-# Footer
-footer_y = HEIGHT - FOOTER_H
+# 24h / 48h
 
-draw.rectangle(
-    [(0, footer_y), (WIDTH, HEIGHT)],
-    fill=(0, 55, 110)
+add_panel(
+    "24 Hour Rainfall",
+    "downloads/24.png",
+    20,
+    150,
+    510,
+    320
 )
 
-timestamp = datetime.utcnow().strftime(
-    "Generated %Y-%m-%d %H:%M UTC"
+add_panel(
+    "48 Hour Rainfall",
+    "downloads/48.png",
+    550,
+    150,
+    510,
+    320
+)
+
+# --------------------------------------------------
+# 72 Hour Large Panel
+# --------------------------------------------------
+
+add_panel(
+    "72 Hour Rainfall",
+    "downloads/72.png",
+    20,
+    490,
+    1040,
+    330
+)
+
+# --------------------------------------------------
+# Virtual Buoys
+# --------------------------------------------------
+
+add_panel(
+    "Virtual Buoys",
+    "downloads/buoys.png",
+    20,
+    845,
+    1040,
+    370
+)
+
+# --------------------------------------------------
+# Footer
+# --------------------------------------------------
+
+draw.rectangle(
+    [
+        (0, HEIGHT - FOOTER_HEIGHT),
+        (WIDTH, HEIGHT)
+    ],
+    fill=(0, 45, 90)
+)
+
+ast_time = datetime.utcnow().strftime(
+    "%Y-%m-%d %H:%M UTC"
 )
 
 draw.text(
-    (20, footer_y + 25),
-    timestamp,
+    (20, HEIGHT - 45),
+    ast_time,
     fill="white",
     font=footer_font
 )
 
 draw.text(
-    (700, footer_y + 25),
+    (760, HEIGHT - 45),
     "www.rabirubiaweather.com",
     fill="white",
     font=footer_font
