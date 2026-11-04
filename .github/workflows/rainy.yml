@@ -2,7 +2,7 @@ name: RabirubiaWeather Rain Virtual Forecast
 
 on:
   schedule:
-    # 5 AM Eastern
+    # 5:00 AM Puerto Rico (AST UTC-4)
     - cron: "0 9 * * *"
 
   workflow_dispatch:
@@ -23,38 +23,34 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install dependencies
+      - name: Install Dependencies
         run: |
-          pip install pillow requests
+          pip install pillow requests pytz
 
-      - name: Prepare folders
+      - name: Create Folders
         run: |
           mkdir -p downloads
           mkdir -p public/weather
 
-      - name: Download NOAA graphics
+      - name: Download NOAA Graphics
         run: |
-          curl -L \
-            https://www.weather.gov/images/sju/marine/wrf/nbm24hr_prec.png \
-            -o downloads/24.png
+          curl -L https://www.weather.gov/images/sju/marine/wrf/nbm24hr_prec.png \
+            -o downloads/24hr.png
 
-          curl -L \
-            https://www.weather.gov/images/sju/marine/wrf/nbm48hr_prec.png \
-            -o downloads/48.png
+          curl -L https://www.weather.gov/images/sju/marine/wrf/nbm48hr_prec.png \
+            -o downloads/48hr.png
 
-          curl -L \
-            https://www.weather.gov/images/sju/marine/wrf/nbm72hr_prec.png \
-            -o downloads/72.png
+          curl -L https://www.weather.gov/images/sju/marine/wrf/nbm72hr_prec.png \
+            -o downloads/72hr.png
 
-          curl -L \
-            https://www.weather.gov/images/sju/marine/verification/buoy/nws_virtual_buoys.png \
+          curl -L https://www.weather.gov/images/sju/marine/verification/buoy/nws_virtual_buoys.png \
             -o downloads/buoys.png
 
-      - name: Create forecast graphic
+      - name: Generate Forecast Image
         run: |
           python scripts/create_collage.py
 
-      - name: Commit graphic
+      - name: Commit Image
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
