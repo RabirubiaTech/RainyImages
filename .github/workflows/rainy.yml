@@ -1,8 +1,8 @@
-name: Daily Marine Forecast Graphic
+name: RabirubiaWeather Rain Virtual Forecast
 
 on:
   schedule:
-    # 5 AM Eastern (adjusts with DST manually if needed)
+    # 5 AM Eastern
     - cron: "0 9 * * *"
 
   workflow_dispatch:
@@ -11,11 +11,11 @@ permissions:
   contents: write
 
 jobs:
-  build-graphic:
+  generate:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: Setup Python
@@ -23,41 +23,46 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install Dependencies
+      - name: Install dependencies
         run: |
-          pip install pillow requests pytz
+          pip install pillow requests
 
-      - name: Create Working Directories
+      - name: Prepare folders
         run: |
           mkdir -p downloads
           mkdir -p public/weather
 
-      - name: Download NOAA Graphics
+      - name: Download NOAA graphics
         run: |
-          curl -L "https://www.weather.gov/images/sju/marine/wrf/nbm24hr_prec.png" \
-            -o downloads/24hr.png
+          curl -L \
+            https://www.weather.gov/images/sju/marine/wrf/nbm24hr_prec.png \
+            -o downloads/24.png
 
-          curl -L "https://www.weather.gov/images/sju/marine/wrf/nbm48hr_prec.png" \
-            -o downloads/48hr.png
+          curl -L \
+            https://www.weather.gov/images/sju/marine/wrf/nbm48hr_prec.png \
+            -o downloads/48.png
 
-          curl -L "https://www.weather.gov/images/sju/marine/wrf/nbm72hr_prec.png" \
-            -o downloads/72hr.png
+          curl -L \
+            https://www.weather.gov/images/sju/marine/wrf/nbm72hr_prec.png \
+            -o downloads/72.png
 
-          curl -L "https://www.weather.gov/images/sju/marine/verification/buoy/nws_virtual_buoys.png" \
+          curl -L \
+            https://www.weather.gov/images/sju/marine/verification/buoy/nws_virtual_buoys.png \
             -o downloads/buoys.png
 
-      - name: Generate Marine Forecast Graphic
+      - name: Create forecast graphic
         run: |
           python scripts/create_collage.py
 
-      - name: Commit Updated Graphic
+      - name: Commit graphic
         run: |
           git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
+          git config user.email "actions@github.com"
 
           git add public/weather/marine-forecast.jpg
 
-          git diff --cached --quiet || \
-          git commit -m "Update marine forecast graphic"
+          git diff --cached --quiet && exit 0
+
+          git commit -m "Update Rain Virtual Forecast"
 
           git push
