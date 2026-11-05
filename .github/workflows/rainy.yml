@@ -1,4 +1,4 @@
-name: RabirubiaWeather Rain Virtual Forecast
+name: RabirubiaWeather Rain Virtual Forecast (images by NWS)
 
 on:
   schedule:
