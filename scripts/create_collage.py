@@ -21,7 +21,7 @@ draw = ImageDraw.Draw(canvas)
 try:
     title_font = ImageFont.truetype(
         "DejaVuSans-Bold.ttf",
-        42
+        30
     )
 
     panel_font = ImageFont.truetype(
