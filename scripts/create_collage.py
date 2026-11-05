@@ -50,7 +50,7 @@ draw.rectangle(
 
 draw.text(
     (25, 30),
-    "RabirubiaWeather Rain Virtual Forecast",
+    "RabirubiaWeather Virtual Rain Forecast (images by NWS)",
     fill="white",
     font=title_font
 )
